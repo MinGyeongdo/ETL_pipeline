@@ -36,7 +36,7 @@ def s3_upload():
             aws_secret_access_key=env('AWS_ACCESS_KEY'))
 
     currentpath = str(BASE_DIR) #/Users/gyeongdo/projects/ETL_pipeline
-    bucket_name = 'team-etl-bucket'
+    bucket_name = 'logdata.min'
     file_name = 'compressed_log.gz'
     file_path = currentpath+'/logs/'+file_name
     
