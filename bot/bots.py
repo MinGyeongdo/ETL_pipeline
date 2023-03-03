@@ -1,8 +1,18 @@
 import requests
 import time
 import random
-from datetime import datetime
 import json
+from pathlib import Path
+import environ
+import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env(DEBUG=(bool, True))
+
+environ.Env.read_env(
+    env_file=os.path.join(BASE_DIR, '.env')
+)
 
 
 def bot_choice(num):
@@ -26,7 +36,7 @@ def get_access(bot_list):
     access_list = []
 
     for bot in bot_list:
-        response = requests.post("http://3.38.181.57/user/login/", json=bot)
+        response = requests.post(f"https://{env('HOST')}/user/login/", json=bot)
         access_key = json.loads(response.text)['token']['access']
         access_list.append(access_key)
     return access_list
@@ -40,7 +50,7 @@ def create_content(access_list):
         rand_num = random.randrange(1,1000)
         headers = {"Authorization": f"Bearer {access_key}"}
         data = {"title": f"글 작성 bot {rand_num}", "body": f"글 내용 생성 bot {rand_num}"}
-        response = requests.post("http://3.38.181.57/blog/create/",json=data, headers=headers)
+        response = requests.post(f"{env('HOST')}/blog/create/",json=data, headers=headers)
         content_info = json.loads(response.text)
         
         content_id_list.append(content_info['id'])
@@ -57,7 +67,7 @@ def revise_content(access_list, content_id_list):
         rand_num = random.randrange(1,1000)
         headers = {"Authorization": f"Bearer {access_key}"}
         data = {"title": f"글 제목 수정 bot {rand_num}", "body": f"글 내용 수정 bot {rand_num}"}
-        response = requests.put(f"http://3.38.181.57/blog/{content_id}/",json=data, headers=headers)
+        response = requests.put(f"{env('HOST')}/blog/{content_id}/",json=data, headers=headers)
         time.sleep(1)
     return f"{len(access_list)}개 봇 글 수정 완료!"
 
@@ -68,7 +78,7 @@ def delete_content(access_list, content_id_list):
     for access_key, content_id in zip(access_list, content_id_list):
         
         headers = {"Authorization": f"Bearer {access_key}"}
-        response = requests.delete(f"http://3.38.181.57/blog/{content_id}/", headers=headers)
+        response = requests.delete(f"{env('HOST')}/blog/{content_id}/", headers=headers)
         time.sleep(1)
     
     return f"{len(access_list)}개 봇 생성한 글 삭제 완료!"
@@ -90,4 +100,4 @@ def bot_activate(num):
 
 if __name__ == '__main__':
     # 원하는 bot 개수 입력
-    bot_activate(15)
+    bot_activate(30)
