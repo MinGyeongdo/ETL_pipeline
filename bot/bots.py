@@ -89,7 +89,7 @@ class bot:
 if __name__ == '__main__':
     # 원하는 bot 개수 입력
     #bot_activate(30)
-    bots = bot(5)
+    bots = bot(30)
     bots.login()
     bots.post()
     bots.update()
