@@ -146,9 +146,3 @@ def update_file():
             file.seek(0)
             # convert back to json.
             file.write(json.dumps(file_data, indent=2))
-
-
-if __name__ == '__main__':
-
-    update_file()
-    executedata_from_encrypted_log()
