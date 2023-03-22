@@ -21,6 +21,28 @@ def get_hash(integer):
     hex_hash = digest.hex()
     return hex_hash #바이트 문자열을 16진수로 변환한 문자열(hex)을 반환
 
+def decrypt(plaintext):
+    """
+    양방향 암호화를 사용하여 key를 생성 및 별도 파일에 저장하며, 복호화된 데이터를 반환하는 함수
+    plaintext: 복호화하려는 데이터(json 형태)
+    """
+    #logkey.key 파일에서 key값 불러오기
+    mod_path = Path(__file__).parent
+    #print(mod_path)
+    absolute_keyfile_path = (mod_path/"./logkey.key").resolve()#resolve: 절대 경로 반환
+    
+    #print(absolute_keyfile_path)
+    my_file = Path(absolute_keyfile_path)
+    if my_file.is_file():
+        # 'logkey.key' 파일이 존재
+        with open(absolute_keyfile_path,'rb') as file:
+            key = file.read()    
+    
+    fernet = Fernet(key)
+    json_log = plaintext
+    decrypt_str = fernet.decrypt(f"{json_log}".encode('ascii'))
+    # decrypt_str = fernet.decrypt(encrypt_str)
+    return decrypt_str.decode('utf-8')
 
 def encrypt(plaintext):
     """
@@ -30,7 +52,7 @@ def encrypt(plaintext):
     #logkey.key 파일에서 key값 불러오기
     mod_path = Path(__file__).parent
     absolute_keyfile_path = (mod_path /"./logkey.key").resolve() #resolve: 절대 경로 반환
-
+    print(absolute_keyfile_path)
     my_file = Path(absolute_keyfile_path)
     if my_file.is_file():
         # 'logkey.key' 파일이 존재
@@ -47,6 +69,28 @@ def encrypt(plaintext):
     encrypt_str = fernet.encrypt(f"{json_log}".encode('ascii'))
     # decrypt_str = fernet.decrypt(encrypt_str)
     return encrypt_str
+def executedata_from_encrypted_log():
+    """
+    암호화된 로그로부터 복호화 하여 메타데이터 추출
+    """
+    mod_path = Path(__file__).parent
+    decrypt_log_path = (mod_path/"../logs/decrypt_log.json").resolve()
+    absolute_logfile_path = (mod_path /"../logs/encrypted_log.json").resolve()
+    print(absolute_logfile_path)
+    
+    with open(absolute_logfile_path,'r') as file:
+            meta =  [json.loads(decrypt(line["data"])) for line in json.loads(file.read())]
+                  
+            #print(type(file_data))
+            # Join encrypted with file_data inside encrypted_logs
+            
+            # Sets file's current position at offset.
+            #file.seek(0)
+            # convert back to json.
+    with open(decrypt_log_path, 'w') as file:
+          file.write(json.dumps(meta, indent=2))            
+
+    
 
 def update_file():
     """
@@ -55,6 +99,7 @@ def update_file():
     """
     #로그 파일 읽어오기
     mod_path = Path(__file__).parent
+    
     absolute_logfile_path = (mod_path /"../logs/board_logging.log").resolve()
 
     #로그 파일의 마지막 줄 읽어오기
@@ -81,19 +126,29 @@ def update_file():
     newLogfile_path = Path(absolute_logfile_path).parent
     newLogfile_path = (newLogfile_path /"encrypted_log.json").resolve() #logs 폴더에 저장
 
-    json_root = {"encrypted_logs": []} #json 파일 생성 시 필요한 root 추가
-    json_root = json.dumps(json_root, indent=4)
+    # json_root = {"encrypted_logs": []} #json 파일 생성 시 필요한 root 추가
+    # json_root = json.dumps(json_root, indent=4)
 
+    
     my_file = Path(newLogfile_path)
     if not my_file.is_file():
         with open(newLogfile_path,'w') as file:
-            file.write(json_root)
-    
-    with open(newLogfile_path,'r+') as file:
-        file_data = json.load(file)
-        # Join encrypted with file_data inside encrypted_logs
-        file_data["encrypted_logs"].append(encrypted)
-        # Sets file's current position at offset.
-        file.seek(0)
-        # convert back to json.
-        json.dump(file_data, file, indent = 4)
+                file.write('[')
+                file.write(json.dumps(encrypted, indent=2))                             
+                file.write(']')
+    else:
+        with open(newLogfile_path,'r+') as file:
+            file_data = json.loads(file.read())
+            #print(type(file_data))
+            # Join encrypted with file_data inside encrypted_logs
+            file_data.append(encrypted)
+            # Sets file's current position at offset.
+            file.seek(0)
+            # convert back to json.
+            file.write(json.dumps(file_data, indent=2))
+
+
+if __name__ == '__main__':
+
+    update_file()
+    executedata_from_encrypted_log()
