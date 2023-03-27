@@ -41,7 +41,6 @@ def decrypt(plaintext):
     fernet = Fernet(key)
     json_log = plaintext
     decrypt_str = fernet.decrypt(f"{json_log}".encode('ascii'))
-    # decrypt_str = fernet.decrypt(encrypt_str)
     return decrypt_str.decode('utf-8')
 
 def encrypt(plaintext):
