@@ -27,7 +27,7 @@ def decrypt(plaintext):
     plaintext: 복호화하려는 데이터(json 형태)
     """
     #logkey.key 파일에서 key값 불러오기
-    mod_path = Path(__file__).parent
+    mod_path = Path(__file__).parent.parent
     #print(mod_path)
     absolute_keyfile_path = (mod_path/"./logkey.key").resolve()#resolve: 절대 경로 반환
     
@@ -49,7 +49,7 @@ def encrypt(plaintext):
     plaintext: 암호화하려는 데이터(json 형태)
     """
     #logkey.key 파일에서 key값 불러오기
-    mod_path = Path(__file__).parent
+    mod_path = Path(__file__).parent.parent
     absolute_keyfile_path = (mod_path /"./logkey.key").resolve() #resolve: 절대 경로 반환
     print(absolute_keyfile_path)
     my_file = Path(absolute_keyfile_path)
